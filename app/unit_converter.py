@@ -149,62 +149,126 @@ def convert_from_base(quantity: float, base_unit: str, target_unit: str) -> floa
     return quantity
 
 
-def suggest_shopping_unit(quantity_in_base: float, base_unit: str, ingredient_name: str) -> tuple[float, str]:
+def to_fraction_string(value: float) -> str:
+    """
+    Convert a decimal to a shopping-friendly fraction string.
+    Rounds up to nearest common fraction for shopping bias.
+    """
+    if value <= 0:
+        return "0"
+
+    # Common fractions used in cooking/shopping
+    fractions = [
+        (1/8, "1/8"),
+        (1/4, "1/4"),
+        (1/3, "1/3"),
+        (1/2, "1/2"),
+        (2/3, "2/3"),
+        (3/4, "3/4"),
+        (1, "1"),
+    ]
+
+    whole = int(value)
+    remainder = value - whole
+
+    # If very close to a whole number, round up
+    if remainder < 0.05:
+        if whole == 0:
+            return fractions[0][1]  # At least 1/8
+        return str(whole)
+    if remainder > 0.95:
+        return str(whole + 1)
+
+    # Find the smallest fraction >= remainder (round up for shopping)
+    frac_str = "1"  # Default to rounding up to next whole
+    for frac_val, frac_name in fractions:
+        if remainder <= frac_val + 0.02:  # Small tolerance
+            frac_str = frac_name
+            break
+
+    if whole == 0:
+        return frac_str
+    if frac_str == "1":
+        return str(whole + 1)
+    return f"{whole} {frac_str}"
+
+
+def suggest_shopping_unit(quantity_in_base: float, base_unit: str, ingredient_name: str) -> tuple[str, str]:
     """
     Suggest a practical shopping unit for an ingredient.
-    Returns: (shopping_quantity, shopping_unit)
+    Returns: (shopping_quantity_string, shopping_unit)
+
+    Display rules:
+    - Prefer fractions over decimals (1/4 cup, 1/2 lb)
+    - Don't display tbsp/tsp if >= 1/8 cup (6 tsp)
+    - Don't display oz if >= 1/8 lb (2 oz)
+    - Round up for shopping bias
     """
     ingredient_lower = ingredient_name.lower()
 
-    # Butter: convert to sticks
+    # Butter: convert to sticks (1 stick = 8 tbsp = 24 tsp = 1/2 cup)
     if "butter" in ingredient_lower and base_unit == "tsp":
-        tbsp = quantity_in_base / 3
-        sticks = tbsp / 8
-        if sticks < 1:
-            return 1, "stick"
-        return round(sticks + 0.49), "stick"  # Round up
+        sticks = quantity_in_base / 24  # 24 tsp per stick
+        if sticks <= 0.5:
+            return "1/2", "stick"
+        return to_fraction_string(sticks), "stick"
 
     # Eggs: round up to buyable quantity
     if "egg" in ingredient_lower:
-        if quantity_in_base <= 6:
-            return 6, "eggs (half dozen)"
-        return ((int(quantity_in_base) + 11) // 12) * 12, "eggs (dozen)"
+        count = int(quantity_in_base)
+        if count <= 6:
+            return "6", "eggs (half dozen)"
+        return str(((count + 11) // 12) * 12), "eggs (dozen)"
 
-    # Flour: convert to cups, suggest bags
-    if "flour" in ingredient_lower and base_unit == "tsp":
-        cups = quantity_in_base / 48
-        if cups <= 5:
-            return round(cups, 1), "cup"
-        return 1, "bag (5 lb)"
-
-    # Sugar: convert to cups
-    if "sugar" in ingredient_lower and base_unit == "tsp":
-        cups = quantity_in_base / 48
-        return round(cups, 1), "cup"
-
-    # Milk: convert to cups or gallons
-    if "milk" in ingredient_lower and base_unit == "tsp":
-        cups = quantity_in_base / 48
-        if cups <= 4:
-            return round(cups, 1), "cup"
-        elif cups <= 8:
-            return 0.5, "gallon"
-        return 1, "gallon"
-
-    # Default: convert back to a readable unit
+    # Volume: convert to cups if >= 1/8 cup (6 tsp)
     if base_unit == "tsp":
-        if quantity_in_base >= 48:
-            return round(quantity_in_base / 48, 2), "cup"
-        elif quantity_in_base >= 3:
-            return round(quantity_in_base / 3, 2), "tbsp"
-        return round(quantity_in_base, 2), "tsp"
+        cups = quantity_in_base / 48
 
+        # Milk: suggest gallon for larger quantities
+        if "milk" in ingredient_lower:
+            if cups <= 4:
+                return to_fraction_string(cups), "cup"
+            elif cups <= 12:
+                return "1/2", "gallon"
+            return "1", "gallon"
+
+        # Flour: suggest bag for large quantities
+        if "flour" in ingredient_lower and cups > 5:
+            return "1", "bag (5 lb)"
+
+        # General volume rule: roll up to larger units
+        # 1 gallon = 16 cups = 768 tsp
+        # 1 quart = 4 cups = 192 tsp
+        # 1 pint = 2 cups = 96 tsp
+        if quantity_in_base >= 768:  # >= 1 gallon
+            gallons = quantity_in_base / 768
+            return to_fraction_string(gallons), "gallon"
+        elif quantity_in_base >= 192:  # >= 1 quart
+            quarts = quantity_in_base / 192
+            return to_fraction_string(quarts), "quart"
+        elif quantity_in_base >= 96:  # >= 1 pint
+            pints = quantity_in_base / 96
+            return to_fraction_string(pints), "pint"
+        elif quantity_in_base >= 6:  # >= 1/8 cup
+            return to_fraction_string(cups), "cup"
+        else:
+            # Small amounts: show as tsp
+            return to_fraction_string(quantity_in_base), "tsp"
+
+    # Weight: convert to pounds if >= 1/8 lb (2 oz)
     if base_unit == "oz":
-        if quantity_in_base >= 16:
-            return round(quantity_in_base / 16, 2), "lb"
-        return round(quantity_in_base, 2), "oz"
+        if quantity_in_base >= 2:  # 2 oz = 1/8 lb
+            pounds = quantity_in_base / 16
+            return to_fraction_string(pounds), "lb"
+        else:
+            return to_fraction_string(quantity_in_base), "oz"
 
-    return round(quantity_in_base, 2), base_unit
+    # Count units: round up to whole numbers
+    if base_unit == "unit":
+        import math
+        return str(math.ceil(quantity_in_base)), "count"
+
+    return to_fraction_string(quantity_in_base), base_unit
 
 
 def get_supported_units() -> set[str]:

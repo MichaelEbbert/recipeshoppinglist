@@ -77,7 +77,7 @@ class ShoppingItem:
     name: str
     total_quantity: float
     base_unit: str
-    shopping_quantity: Optional[float] = None
+    shopping_quantity: Optional[str] = None  # Fraction string like "1/4" or "1 1/2"
     shopping_unit: Optional[str] = None
     on_hand: float = 0
     needed: float = 0

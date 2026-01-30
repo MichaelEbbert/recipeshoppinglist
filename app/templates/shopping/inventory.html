@@ -16,6 +16,9 @@
     </div>
     {% elif items %}
     <form action="/shopping/generate" method="post">
+        {% for recipe_id in recipe_ids %}
+        <input type="hidden" name="recipe_ids" value="{{ recipe_id }}">
+        {% endfor %}
         <table class="inventory-table">
             <thead>
                 <tr>
@@ -45,7 +48,6 @@
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary">Generate Shopping List</button>
-            <a href="/shopping" class="btn">Back to Selection</a>
         </div>
     </form>
     {% endif %}

@@ -354,76 +354,50 @@ body {
 }
 
 /* Shopping selection */
-.shopping-layout {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 2rem;
-}
-
-@media (max-width: 900px) {
-    .shopping-layout {
-        grid-template-columns: 1fr;
-    }
-}
-
-.recipe-select-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.recipe-select-card {
-    background: #fff;
-    padding: 1rem;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.recipe-select-card h3 {
-    margin: 0;
-    font-size: 1rem;
-}
-
-.recipe-select-card p {
-    margin: 0.25rem 0 0 0;
-    font-size: 0.85rem;
+.shopping-select p {
     color: #666;
+    margin-bottom: 1.5rem;
 }
 
-.selected-sidebar {
+.recipe-checklist {
     background: #fff;
-    padding: 1.5rem;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    height: fit-content;
-    position: sticky;
-    top: 1rem;
+    margin-bottom: 1.5rem;
 }
 
-.selected-sidebar h2 {
-    margin-top: 0;
-    font-size: 1.1rem;
-}
-
-.selected-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 1rem 0;
-}
-
-.selected-list li {
+.recipe-checkbox {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 0.5rem 0;
+    padding: 1rem;
     border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
-.shopping-actions {
-    margin-top: 1rem;
+.recipe-checkbox:last-child {
+    border-bottom: none;
+}
+
+.recipe-checkbox:hover {
+    background: #f8f9fa;
+}
+
+.recipe-checkbox input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 1rem;
+    cursor: pointer;
+}
+
+.recipe-checkbox .recipe-name {
+    font-weight: 500;
+    margin-right: 1rem;
+}
+
+.recipe-checkbox .recipe-desc {
+    color: #666;
+    font-size: 0.9rem;
 }
 
 .help-text, .empty-text {

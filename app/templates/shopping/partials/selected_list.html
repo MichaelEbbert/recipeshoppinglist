@@ -13,6 +13,14 @@
     </li>
     {% endfor %}
 </ul>
+<div class="shopping-actions">
+    <a href="/shopping/inventory" class="btn btn-primary btn-block">
+        Continue to Inventory Check
+    </a>
+    <form action="/shopping/clear" method="post">
+        <button type="submit" class="btn btn-block">Clear All</button>
+    </form>
+</div>
 {% else %}
-<p class="empty-text">No recipes selected</p>
+<p class="help-text">Select recipes above to start building your shopping list.</p>
 {% endif %}
