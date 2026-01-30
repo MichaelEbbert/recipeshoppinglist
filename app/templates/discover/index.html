@@ -12,18 +12,29 @@
         <form hx-get="/discover/search"
               hx-target="#recipe-results"
               hx-swap="innerHTML"
-              hx-indicator="#search-spinner">
+              hx-indicator="#search-spinner"
+              hx-include="#complexity-filter">
             <div class="search-bar">
                 <input type="text" name="q" placeholder="Search for recipes (e.g., chicken, pasta, soup)...">
                 <button type="submit" class="btn btn-primary">Search</button>
             </div>
         </form>
 
+        <div class="filter-section">
+            <label for="complexity-filter">Max Complexity:</label>
+            <select id="complexity-filter" name="max_complexity" class="complexity-select">
+                <option value="easy">Easy only</option>
+                <option value="medium">Medium & below</option>
+                <option value="hard" selected>All (including hard)</option>
+            </select>
+        </div>
+
         <button class="btn"
                 hx-get="/discover/search"
                 hx-target="#recipe-results"
                 hx-swap="innerHTML"
-                hx-indicator="#search-spinner">
+                hx-indicator="#search-spinner"
+                hx-include="#complexity-filter">
             Surprise Me!
         </button>
 

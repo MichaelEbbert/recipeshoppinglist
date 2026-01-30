@@ -16,6 +16,10 @@
         </div>
     </div>
 
+    {% if recipe.complexity %}
+    <span class="complexity-badge complexity-{{ recipe.complexity }}">{{ recipe.complexity | capitalize }}</span>
+    {% endif %}
+
     {% if recipe.description %}
     <p class="recipe-description">{{ recipe.description }}</p>
     {% endif %}

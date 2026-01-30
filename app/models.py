@@ -32,6 +32,7 @@ class Recipe:
     description: Optional[str] = None
     instructions: Optional[str] = None
     source_url: Optional[str] = None
+    complexity: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     ingredients: list[Ingredient] = None
@@ -39,6 +40,35 @@ class Recipe:
     def __post_init__(self):
         if self.ingredients is None:
             self.ingredients = []
+
+
+def calculate_complexity(num_ingredients: int, instructions: str) -> str:
+    """
+    Calculate recipe complexity based on ingredients and steps.
+
+    Thresholds based on analysis of 595 recipes:
+    - Easy: combined score ≤16 (roughly bottom 25%)
+    - Medium: combined score 17-29
+    - Hard: combined score ≥30 (roughly top 25%)
+    """
+    import re
+
+    # Count steps by splitting on newlines or sentence boundaries
+    if instructions:
+        steps = re.split(r'(?:\r?\n)+|(?<=\.)\s+(?=[A-Z0-9])', instructions)
+        steps = [s.strip() for s in steps if s.strip() and len(s.strip()) > 10]
+        num_steps = len(steps)
+    else:
+        num_steps = 0
+
+    combined_score = num_ingredients + num_steps
+
+    if combined_score <= 16:
+        return "easy"
+    elif combined_score >= 30:
+        return "hard"
+    else:
+        return "medium"
 
 
 @dataclass

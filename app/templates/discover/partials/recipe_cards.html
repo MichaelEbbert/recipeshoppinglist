@@ -17,21 +17,21 @@
         {% endif %}
         <div class="discover-content">
             <h3>{{ recipe.title }}</h3>
+            {% if recipe.complexity %}
+            <span class="complexity-badge complexity-{{ recipe.complexity }}">{{ recipe.complexity | capitalize }}</span>
+            {% endif %}
             {% if recipe.description %}
             <p>{{ recipe.description }}</p>
             {% endif %}
             <p class="source-tag">{{ recipe.source }}</p>
         </div>
         <div class="discover-actions">
-            <button class="btn"
-                    hx-get="/discover/fetch-recipe?url={{ recipe.url | urlencode }}"
+            <button class="btn btn-primary"
+                    hx-get="/discover/fetch-recipe?id={{ recipe.id }}"
                     hx-target="#recipe-preview"
                     hx-swap="innerHTML">
                 View & Add
             </button>
-            <a href="{{ recipe.url }}" target="_blank" class="btn btn-link">
-                View Source
-            </a>
         </div>
     </div>
     {% endfor %}

@@ -6,7 +6,7 @@ from typing import Optional
 import re
 
 from ..database import get_db
-from ..models import Recipe, Ingredient
+from ..models import Recipe, Ingredient, calculate_complexity
 
 router = APIRouter(prefix="/recipes", tags=["recipes"])
 templates = Jinja2Templates(directory="app/templates")
@@ -16,7 +16,7 @@ templates = Jinja2Templates(directory="app/templates")
 async def list_recipes(request: Request, db: aiosqlite.Connection = Depends(get_db)):
     """List all recipes."""
     cursor = await db.execute(
-        "SELECT id, name, description FROM recipes ORDER BY name"
+        "SELECT id, name, description, complexity FROM recipes ORDER BY name"
     )
     recipes = await cursor.fetchall()
 
@@ -46,9 +46,13 @@ async def create_recipe(
     db: aiosqlite.Connection = Depends(get_db),
 ):
     """Create a new recipe."""
+    # Count ingredients for complexity calculation
+    ingredient_lines = [l.strip() for l in ingredients_text.strip().split("\n") if l.strip()]
+    complexity = calculate_complexity(len(ingredient_lines), instructions)
+
     cursor = await db.execute(
-        "INSERT INTO recipes (name, description, instructions, source_url) VALUES (?, ?, ?, ?)",
-        (name, description, instructions, source_url or None)
+        "INSERT INTO recipes (name, description, instructions, source_url, complexity) VALUES (?, ?, ?, ?, ?)",
+        (name, description, instructions, source_url or None, complexity)
     )
     recipe_id = cursor.lastrowid
 
@@ -78,6 +82,7 @@ async def view_recipe(request: Request, recipe_id: int, db: aiosqlite.Connection
         description=recipe_row["description"],
         instructions=recipe_row["instructions"],
         source_url=recipe_row["source_url"],
+        complexity=recipe_row["complexity"] if "complexity" in recipe_row.keys() else "medium",
     )
 
     cursor = await db.execute(
@@ -122,6 +127,7 @@ async def print_recipe(request: Request, recipe_id: int, db: aiosqlite.Connectio
         description=recipe_row["description"],
         instructions=recipe_row["instructions"],
         source_url=recipe_row["source_url"],
+        complexity=recipe_row["complexity"] if "complexity" in recipe_row.keys() else "medium",
     )
 
     cursor = await db.execute(
@@ -191,11 +197,15 @@ async def update_recipe(
     db: aiosqlite.Connection = Depends(get_db),
 ):
     """Update an existing recipe."""
+    # Recalculate complexity
+    ingredient_lines = [l.strip() for l in ingredients_text.strip().split("\n") if l.strip()]
+    complexity = calculate_complexity(len(ingredient_lines), instructions)
+
     await db.execute(
         """UPDATE recipes
-           SET name = ?, description = ?, instructions = ?, source_url = ?, updated_at = CURRENT_TIMESTAMP
+           SET name = ?, description = ?, instructions = ?, source_url = ?, complexity = ?, updated_at = CURRENT_TIMESTAMP
            WHERE id = ?""",
-        (name, description, instructions, source_url or None, recipe_id)
+        (name, description, instructions, source_url or None, complexity, recipe_id)
     )
 
     # Delete existing ingredients and re-insert

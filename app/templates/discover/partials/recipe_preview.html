@@ -47,8 +47,7 @@
 </div>
 {% else %}
 <div class="alert">
-    <p>Could not parse recipe from this page. You can still view it on the source site and add it manually.</p>
-    <a href="{{ url }}" target="_blank" class="btn">View on Source Site</a>
-    <button class="btn" onclick="this.parentElement.innerHTML = ''">Close</button>
+    <p>Could not load recipe details. Please try another recipe.</p>
+    <button class="btn" onclick="this.parentElement.parentElement.innerHTML = ''">Close</button>
 </div>
 {% endif %}

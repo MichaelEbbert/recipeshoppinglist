@@ -516,6 +516,26 @@ body {
     gap: 1rem;
     margin-bottom: 2rem;
     flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-section label {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.complexity-select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    background: #fff;
 }
 
 .search-bar {
@@ -657,6 +677,32 @@ body {
     text-align: center;
     padding: 3rem;
     color: #666;
+}
+
+/* Complexity badges */
+.complexity-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.complexity-easy {
+    background: #d4edda;
+    color: #155724;
+}
+
+.complexity-medium {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.complexity-hard {
+    background: #f8d7da;
+    color: #721c24;
 }
 
 /* Error page */

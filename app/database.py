@@ -26,6 +26,7 @@ async def init_db():
                 description TEXT,
                 instructions TEXT,
                 source_url TEXT,
+                complexity TEXT DEFAULT 'medium',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
@@ -67,6 +68,13 @@ async def init_db():
             CREATE INDEX IF NOT EXISTS idx_shopping_selections_recipe ON shopping_selections(recipe_id);
         """)
         await db.commit()
+
+        # Migration: add complexity column if it doesn't exist
+        try:
+            await db.execute("ALTER TABLE recipes ADD COLUMN complexity TEXT DEFAULT 'medium'")
+            await db.commit()
+        except Exception:
+            pass  # Column already exists
 
         # Seed default unit conversions if empty
         cursor = await db.execute("SELECT COUNT(*) FROM unit_conversions")
