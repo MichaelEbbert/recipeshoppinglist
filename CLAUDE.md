@@ -13,11 +13,13 @@ This is a local web application that runs on a home PC and is accessible from an
 - Each recipe has a name, optional description, and a list of ingredients
 - Ingredients include: name, quantity, and unit (e.g., "2 tbsp butter")
 - Add, edit, and delete recipes
+- Automatic complexity rating (easy/medium/hard) based on ingredient count and steps
 
 ### 2. Meal Planning / Recipe Selection
-- Web page displaying all saved recipes
+- Web page displaying all saved recipes with complexity badges
 - Select multiple recipes for an upcoming shopping trip
 - Selected recipes are used to generate the shopping list
+- Live updates via HTMX polling (5-second refresh)
 
 ### 3. Ingredient Aggregation
 - Combine ingredients across all selected recipes
@@ -45,15 +47,29 @@ This is a local web application that runs on a home PC and is accessible from an
 - Example: Need 1 tbsp butter, have none → "Buy 1 pack of butter"
 
 ### 7. Recipe Discovery
-- Page showing recipe suggestions from external web sources
-- Sources should be easy to parse (e.g., AllRecipes, Tasty, BBC Good Food)
-- "Add to my recipes" button to save a suggested recipe to the family list
-- "Show more" button to fetch new suggestions
+- Search for recipes from 4 external sources (queried in parallel):
+  - **TheMealDB** - General recipes (free API)
+  - **BBC Good Food** - British recipes, good variety
+  - **Skinnytaste** - Air fryer and healthy recipes
+  - **Hey Grill Hey** - BBQ and grilling recipes
+- Results are interleaved from all sources for variety
+- Max complexity filter (easy only, medium & below, or all)
+- Indian cuisine filtered out per user preference
+- "Surprise Me" button for random recipe suggestions
+- "View & Add" to preview and import recipes to your collection
 
 ### 8. Printing
 - Print-friendly recipe view
 - Target max 67 lines per recipe (single page on household printer)
 - Clean layout: recipe name, ingredients, instructions - no UI chrome
+
+### 9. Complexity Rating
+- Automatic rating based on analysis of 595 recipes:
+  - **Easy**: ≤16 combined (ingredients + steps)
+  - **Medium**: 17-29 combined
+  - **Hard**: ≥30 combined
+- Displayed as color-coded badges on recipe list, detail, and discover pages
+- Filter discovery results by maximum complexity
 
 ## Design Principles
 
@@ -69,19 +85,22 @@ Unit conversion only happens when:
 - Calculating shopping quantities
 - Comparing needed amounts against on-hand inventory
 
+### No Browser Caching
+All pages return `Cache-Control: no-store` headers to ensure users always see fresh content. Static files (CSS) are still cached for performance.
+
 ## Technical Requirements
 
 ### Architecture
 - Local web server running on home PC
 - Web-based UI accessible via browser from any device on local network
-- Access via local IP address (e.g., `http://192.168.1.142:PORT`)
+- Access via local IP address (e.g., `http://192.168.1.142:8000`)
 - No authentication required (trusted home network)
 
 ### Database
-- SQLite single-file database
+- SQLite single-file database (`data/recipes.db`)
 - Simple, no separate database server to maintain
 - Easy to backup (copy one file)
-- Stored in the application directory
+- Auto-created on first run
 
 ### Tech Stack
 **Backend:**
@@ -90,43 +109,101 @@ Unit conversion only happens when:
 - Jinja2 (server-side templates)
 - SQLite via `aiosqlite` (async SQLite access)
 - Uvicorn (ASGI server with hot reload for development)
+- httpx (async HTTP client for recipe discovery)
+- BeautifulSoup4 (HTML parsing for recipe scraping)
 
 **Frontend:**
 - Server-rendered HTML via Jinja2 templates
 - HTMX for dynamic updates without writing JavaScript
 - Minimal CSS (simple, functional styling)
-- Print-friendly recipe view (target: 67 lines max per recipe for printer compatibility)
+- Print-friendly recipe view (target: 67 lines max per recipe)
 
 **Live Updates:**
 - HTMX polling (`hx-trigger="every 5s"`) for near-real-time sync
 - When one user updates a recipe, others see it within ~5 seconds
 - Simple approach, no WebSocket complexity needed
 
-### Unit Conversion System
-Needs a comprehensive mapping of:
-- Cooking units (tsp, tbsp, cup, oz, lb, ml, L, g, kg, etc.)
-- Shopping units (pack, stick, bottle, bag, can, bunch, etc.)
-- Ingredient-specific conversions (e.g., 1 stick butter = 8 tbsp = 1/2 cup)
+### Recipe Discovery Sources
+All sources are queried via HTTP with no API keys required:
+- **TheMealDB**: Free public JSON API
+- **BBC Good Food**: HTML scraping with JSON-LD parsing
+- **Skinnytaste**: WordPress blog with JSON-LD recipe data
+- **Hey Grill Hey**: WordPress blog with JSON-LD recipe data
 
-### Data Model
+No AI/LLM tokens used for discovery - just standard HTTP requests.
+
+## Project Structure
+
+```
+recipeshoppinglist/
+├── CLAUDE.md              # This file
+├── requirements.txt       # Python dependencies
+├── main.py               # FastAPI app entry point
+├── .gitignore
+├── app/
+│   ├── __init__.py
+│   ├── database.py       # SQLite setup, migrations, seeding
+│   ├── models.py         # Data classes, complexity calculation
+│   ├── unit_converter.py # Unit conversion logic
+│   ├── routers/
+│   │   ├── recipes.py    # Recipe CRUD endpoints
+│   │   ├── shopping.py   # Shopping list flow
+│   │   └── discover.py   # Recipe discovery from external sources
+│   ├── templates/        # Jinja2 + HTMX templates
+│   │   ├── base.html
+│   │   ├── index.html
+│   │   ├── recipes/
+│   │   ├── shopping/
+│   │   └── discover/
+│   └── static/
+│       └── css/style.css
+└── data/                 # Created at runtime
+    └── recipes.db        # SQLite database
+```
+
+## Data Model
 
 **Recipe**
 - id
 - name
 - description (optional)
-- source (optional - URL if imported)
-- ingredients[]
+- instructions
+- source_url (optional - URL if imported)
+- complexity (easy/medium/hard)
+- created_at, updated_at
 
 **Ingredient** (stored exactly as written in recipe)
+- id
+- recipe_id
 - name
 - quantity
 - unit (as specified in recipe, e.g., "tbsp", "cup", "cloves")
+- sort_order
 
-**Shopping Unit Mapping**
-- ingredient category
-- cooking unit
-- shopping unit
-- conversion factor
+**Shopping Selections** (temporary, for current shopping session)
+- recipe_id
+- selected_at
+
+## Running the Application
+
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate (Windows)
+venv\Scripts\activate
+
+# Activate (Mac/Linux)
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the server
+python main.py
+```
+
+Access at `http://localhost:8000` or `http://<your-local-ip>:8000` from other devices.
 
 ## User Workflow
 
