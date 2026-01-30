@@ -22,6 +22,19 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
+@app.middleware("http")
+async def add_no_cache_headers(request: Request, call_next):
+    """Add Cache-Control headers to prevent browser caching."""
+    response = await call_next(request)
+    # Don't cache HTML pages or API responses (but allow static files to cache)
+    if not request.url.path.startswith("/static"):
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
+
 # Mount static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
