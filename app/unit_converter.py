@@ -207,6 +207,27 @@ def suggest_shopping_unit(quantity_in_base: float, base_unit: str, ingredient_na
     return round(quantity_in_base, 2), base_unit
 
 
+def get_supported_units() -> set[str]:
+    """Return all supported units for conversion."""
+    supported = set()
+    supported.update(VOLUME_TO_TSP.keys())
+    supported.update(WEIGHT_TO_OZ.keys())
+    supported.update(COUNT_UNITS)
+    # Add ingredient-specific units
+    for conversions in INGREDIENT_CONVERSIONS.values():
+        supported.update(conversions.keys())
+    return supported
+
+
+def check_unsupported_units(unit: str) -> bool:
+    """Check if a unit is unsupported for aggregation. Returns True if unsupported."""
+    if not unit:
+        return False
+    unit = normalize_unit(unit)
+    supported = get_supported_units()
+    return unit not in supported
+
+
 def normalize_ingredient_name(name: str) -> str:
     """Normalize ingredient name for matching."""
     # Remove common modifiers

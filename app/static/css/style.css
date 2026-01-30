@@ -705,6 +705,45 @@ body {
     color: #721c24;
 }
 
+/* Unit warnings */
+.unit-warnings {
+    background: #f8d7da;
+    border: 2px solid #dc3545;
+    border-radius: 6px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #721c24;
+}
+
+.unit-warnings h3 {
+    margin: 0 0 0.5rem 0;
+    color: #721c24;
+}
+
+.unit-warnings ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.unit-warnings li {
+    margin: 0.25rem 0;
+}
+
+.unit-warnings p:last-child {
+    margin-bottom: 0;
+    font-style: italic;
+}
+
+.btn-warning {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-warning:hover {
+    background: #c82333;
+    border-color: #bd2130;
+}
+
 /* Error page */
 .error-page {
     text-align: center;

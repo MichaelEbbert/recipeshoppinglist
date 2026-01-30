@@ -7,6 +7,7 @@ import re
 
 from ..database import get_db
 from ..models import Recipe, Ingredient, calculate_complexity
+from ..unit_converter import check_unsupported_units
 
 router = APIRouter(prefix="/recipes", tags=["recipes"])
 templates = Jinja2Templates(directory="app/templates")
@@ -35,6 +36,20 @@ async def new_recipe_form(request: Request):
     })
 
 
+def find_unsupported_units(ingredients_text: str) -> list[dict]:
+    """Find ingredients with unsupported units. Returns list of {line, unit} dicts."""
+    warnings = []
+    lines = ingredients_text.strip().split("\n")
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        quantity, unit, name = parse_ingredient_line(line)
+        if unit and check_unsupported_units(unit):
+            warnings.append({"line": line, "unit": unit})
+    return warnings
+
+
 @router.post("/new")
 async def create_recipe(
     request: Request,
@@ -43,9 +58,26 @@ async def create_recipe(
     instructions: str = Form(""),
     ingredients_text: str = Form(""),
     source_url: str = Form(""),
+    confirm_unsupported: str = Form(""),
     db: aiosqlite.Connection = Depends(get_db),
 ):
     """Create a new recipe."""
+    # Check for unsupported units
+    unit_warnings = find_unsupported_units(ingredients_text)
+
+    # If warnings exist and not confirmed, show warning and return form
+    if unit_warnings and not confirm_unsupported:
+        return templates.TemplateResponse("recipes/edit.html", {
+            "request": request,
+            "recipe": None,
+            "name": name,
+            "description": description,
+            "instructions": instructions,
+            "ingredients_text": ingredients_text,
+            "source_url": source_url,
+            "unit_warnings": unit_warnings,
+        })
+
     # Count ingredients for complexity calculation
     ingredient_lines = [l.strip() for l in ingredients_text.strip().split("\n") if l.strip()]
     complexity = calculate_complexity(len(ingredient_lines), instructions)
@@ -194,9 +226,26 @@ async def update_recipe(
     instructions: str = Form(""),
     ingredients_text: str = Form(""),
     source_url: str = Form(""),
+    confirm_unsupported: str = Form(""),
     db: aiosqlite.Connection = Depends(get_db),
 ):
     """Update an existing recipe."""
+    # Check for unsupported units
+    unit_warnings = find_unsupported_units(ingredients_text)
+
+    # If warnings exist and not confirmed, show warning and return form
+    if unit_warnings and not confirm_unsupported:
+        return templates.TemplateResponse("recipes/edit.html", {
+            "request": request,
+            "recipe": {"id": recipe_id},
+            "name": name,
+            "description": description,
+            "instructions": instructions,
+            "ingredients_text": ingredients_text,
+            "source_url": source_url,
+            "unit_warnings": unit_warnings,
+        })
+
     # Recalculate complexity
     ingredient_lines = [l.strip() for l in ingredients_text.strip().split("\n") if l.strip()]
     complexity = calculate_complexity(len(ingredient_lines), instructions)

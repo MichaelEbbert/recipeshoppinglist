@@ -6,16 +6,33 @@
 <div class="recipe-edit">
     <h1>{% if recipe %}Edit Recipe{% else %}New Recipe{% endif %}</h1>
 
+    {% if unit_warnings %}
+    <div class="unit-warnings">
+        <h3>Warning: Unsupported Units Detected</h3>
+        <p>The following ingredients use units that won't aggregate properly on shopping lists:</p>
+        <ul>
+            {% for warning in unit_warnings %}
+            <li><strong>{{ warning.unit }}</strong> in "{{ warning.line }}"</li>
+            {% endfor %}
+        </ul>
+        <p>Click the button again to save anyway, or edit the ingredients to use supported units.</p>
+    </div>
+    {% endif %}
+
     <form method="post" action="{% if recipe %}/recipes/{{ recipe.id }}/edit{% else %}/recipes/new{% endif %}">
+        {% if unit_warnings %}
+        <input type="hidden" name="confirm_unsupported" value="1">
+        {% endif %}
+
         <div class="form-group">
             <label for="name">Recipe Name *</label>
             <input type="text" id="name" name="name" required
-                   value="{{ recipe.name if recipe else '' }}">
+                   value="{{ name if name is defined else (recipe.name if recipe else '') }}">
         </div>
 
         <div class="form-group">
             <label for="description">Description</label>
-            <textarea id="description" name="description" rows="2">{{ recipe.description if recipe else '' }}</textarea>
+            <textarea id="description" name="description" rows="2">{{ description if description is defined else (recipe.description if recipe else '') }}</textarea>
         </div>
 
         <div class="form-group">
@@ -27,18 +44,24 @@
 
         <div class="form-group">
             <label for="instructions">Instructions</label>
-            <textarea id="instructions" name="instructions" rows="10">{{ recipe.instructions if recipe else '' }}</textarea>
+            <textarea id="instructions" name="instructions" rows="10">{{ instructions if instructions is defined else (recipe.instructions if recipe else '') }}</textarea>
         </div>
 
         <div class="form-group">
             <label for="source_url">Source URL (optional)</label>
-            <input type="url" id="source_url" name="source_url"
-                   value="{{ recipe.source_url if recipe else '' }}">
+            <input type="text" id="source_url" name="source_url"
+                   value="{{ source_url if source_url is defined else (recipe.source_url if recipe else '') }}">
         </div>
 
         <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
-                {% if recipe %}Save Changes{% else %}Create Recipe{% endif %}
+            <button type="submit" class="btn btn-primary{% if unit_warnings %} btn-warning{% endif %}">
+                {% if unit_warnings %}
+                    Save Anyway
+                {% elif recipe %}
+                    Save Changes
+                {% else %}
+                    Create Recipe
+                {% endif %}
             </button>
             <a href="{% if recipe %}/recipes/{{ recipe.id }}{% else %}/recipes{% endif %}" class="btn">Cancel</a>
         </div>
