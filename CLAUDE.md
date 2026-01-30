@@ -24,6 +24,12 @@ This is a local web application that runs on a home PC and is accessible from an
 - Just type "salt to taste" as the ingredient name (no quantity/unit)
 - These appear on shopping lists as-is without aggregation
 
+**Ingredient parsing:**
+- Supports decimals (3.2 lb), fractions (1/2 cup), mixed fractions (1 1/2 cups), and whole numbers
+- Parser tries patterns in order: decimals → mixed fractions → simple fractions → whole numbers
+- Specific count units are preserved: "3 slices cheese" stays as "3 slice" not "3 count"
+- Preserved count units: slice, clove, can, bunch, head, stalk, sprig, leaf, piece
+
 ### 2. Meal Planning / Recipe Selection
 - Web page displaying all saved recipes with checkboxes
 - Select multiple recipes for an upcoming shopping trip
@@ -229,6 +235,11 @@ python main.py
 ```
 
 Access at `http://localhost:8000` or `http://<your-local-ip>:8000` from other devices.
+
+## Development Notes
+
+- **Server restart**: Uvicorn's `--reload` flag watches for file changes, but sometimes changes aren't detected. Restart the server manually if code changes don't take effect.
+- **Browser caching**: HTML pages have `Cache-Control: no-store` headers, so browser caching shouldn't be an issue. CSS is cached normally.
 
 ## User Workflow
 
