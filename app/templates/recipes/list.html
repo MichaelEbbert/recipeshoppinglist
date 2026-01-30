@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Recipes - Recipe Shopping List{% endblock %}
+
+{% block content %}
+<div class="recipes-page">
+    <div class="page-header">
+        <h1>Recipes</h1>
+        <a href="/recipes/new" class="btn btn-primary">Add Recipe</a>
+    </div>
+
+    {% if recipes %}
+    <div class="recipe-grid">
+        {% for recipe in recipes %}
+        <div class="recipe-card">
+            <h3><a href="/recipes/{{ recipe.id }}">{{ recipe.name }}</a></h3>
+            {% if recipe.description %}
+            <p>{{ recipe.description[:100] }}{% if recipe.description|length > 100 %}...{% endif %}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No recipes yet. Add your first recipe to get started!</p>
+        <a href="/recipes/new" class="btn btn-primary">Add Recipe</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

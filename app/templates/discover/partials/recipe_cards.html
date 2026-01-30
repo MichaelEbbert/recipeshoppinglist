@@ -1,0 +1,41 @@
+{% if error_message %}
+<div class="alert alert-error">
+    <p>{{ error_message }}</p>
+</div>
+{% endif %}
+
+{% if recipes %}
+<p class="search-info">Found recipes for "{{ search_term }}"</p>
+
+<div class="discover-grid">
+    {% for recipe in recipes %}
+    <div class="discover-card">
+        {% if recipe.image %}
+        <img src="{{ recipe.image }}" alt="{{ recipe.title }}" class="discover-image">
+        {% else %}
+        <div class="discover-image-placeholder"></div>
+        {% endif %}
+        <div class="discover-content">
+            <h3>{{ recipe.title }}</h3>
+            {% if recipe.description %}
+            <p>{{ recipe.description }}</p>
+            {% endif %}
+            <p class="source-tag">{{ recipe.source }}</p>
+        </div>
+        <div class="discover-actions">
+            <button class="btn"
+                    hx-get="/discover/fetch-recipe?url={{ recipe.url | urlencode }}"
+                    hx-target="#recipe-preview"
+                    hx-swap="innerHTML">
+                View & Add
+            </button>
+            <a href="{{ recipe.url }}" target="_blank" class="btn btn-link">
+                View Source
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="empty-text">No recipes found. Try a different search term.</p>
+{% endif %}

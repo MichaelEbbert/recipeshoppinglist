@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Recipe Shopping List{% endblock %}
+
+{% block content %}
+<div class="home">
+    <h1>Recipe Shopping List</h1>
+    <p class="tagline">Manage your family recipes and create smart shopping lists</p>
+
+    <div class="home-cards">
+        <a href="/recipes" class="home-card">
+            <h2>Recipes</h2>
+            <p>Browse and manage your family's recipe collection</p>
+        </a>
+
+        <a href="/shopping" class="home-card">
+            <h2>Shopping</h2>
+            <p>Select recipes and generate your shopping list</p>
+        </a>
+
+        <a href="/discover" class="home-card">
+            <h2>Discover</h2>
+            <p>Find new recipes to try from the web</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

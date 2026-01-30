@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping List{% endblock %}
+
+{% block content %}
+<div class="shopping-list">
+    <div class="page-header">
+        <h1>Shopping List</h1>
+        <button onclick="window.print()" class="btn">Print</button>
+    </div>
+
+    {% if items %}
+    <ul class="shopping-items">
+        {% for item in items %}
+        <li>
+            <label class="shopping-item">
+                <input type="checkbox">
+                <span class="item-text">
+                    <strong>{{ item.quantity }}</strong> {{ item.unit }}
+                    <span class="item-name">{{ item.name }}</span>
+                </span>
+            </label>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <div class="list-actions">
+        <a href="/shopping/inventory" class="btn">Adjust Inventory</a>
+        <a href="/shopping" class="btn">Start Over</a>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>You have everything you need!</p>
+        <a href="/shopping" class="btn btn-primary">Back to Shopping</a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    @media print {
+        .page-header button,
+        .list-actions,
+        .navbar,
+        .footer {
+            display: none !important;
+        }
+
+        .shopping-items {
+            list-style: none;
+            padding: 0;
+        }
+
+        .shopping-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            padding: 0.3em 0;
+            border-bottom: 1px dotted #ccc;
+        }
+
+        .shopping-item input[type="checkbox"] {
+            width: 1em;
+            height: 1em;
+        }
+    }
+</style>
+{% endblock %}

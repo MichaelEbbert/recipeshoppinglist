@@ -1,0 +1,18 @@
+{% if selected %}
+<ul class="selected-list">
+    {% for recipe in selected %}
+    <li>
+        <span>{{ recipe.name }}</span>
+        <button class="btn-remove"
+                hx-post="/shopping/deselect/{{ recipe.id }}"
+                hx-target="#selected-recipes"
+                hx-swap="innerHTML"
+                hx-get="/shopping/selected-partial">
+            &times;
+        </button>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p class="empty-text">No recipes selected</p>
+{% endif %}

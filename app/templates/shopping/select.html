@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Select Recipes - Shopping{% endblock %}
+
+{% block content %}
+<div class="shopping-select">
+    <div class="page-header">
+        <h1>Plan Your Shopping</h1>
+    </div>
+
+    <div class="shopping-layout">
+        <section class="available-recipes">
+            <h2>Select Recipes to Make</h2>
+
+            {% if recipes %}
+            <div class="recipe-select-grid">
+                {% for recipe in recipes %}
+                <div class="recipe-select-card">
+                    <div class="recipe-info">
+                        <h3>{{ recipe.name }}</h3>
+                        {% if recipe.description %}
+                        <p>{{ recipe.description[:80] }}{% if recipe.description|length > 80 %}...{% endif %}</p>
+                        {% endif %}
+                    </div>
+                    <div class="recipe-select-action">
+                        {% if recipe.id in selected_ids %}
+                        <button class="btn btn-selected"
+                                hx-post="/shopping/deselect/{{ recipe.id }}"
+                                hx-swap="outerHTML">
+                            Selected
+                        </button>
+                        {% else %}
+                        <button class="btn"
+                                hx-post="/shopping/select/{{ recipe.id }}"
+                                hx-swap="outerHTML">
+                            Select
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p>No recipes yet. <a href="/recipes/new">Add some recipes</a> first!</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <aside class="selected-sidebar">
+            <h2>Selected Recipes</h2>
+            <div id="selected-recipes"
+                 hx-get="/shopping/selected-partial"
+                 hx-trigger="every 5s"
+                 hx-swap="innerHTML">
+                {% include "shopping/partials/selected_list.html" with context %}
+            </div>
+
+            <div class="shopping-actions">
+                {% if selected_ids %}
+                <a href="/shopping/inventory" class="btn btn-primary btn-block">
+                    Continue to Inventory Check
+                </a>
+                <form action="/shopping/clear" method="post">
+                    <button type="submit" class="btn btn-block">Clear All</button>
+                </form>
+                {% else %}
+                <p class="help-text">Select recipes above to start building your shopping list.</p>
+                {% endif %}
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

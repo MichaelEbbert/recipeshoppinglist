@@ -1,0 +1,54 @@
+{% if error_message %}
+<div class="alert alert-error">
+    <p>{{ error_message }}</p>
+    <button class="btn" onclick="this.parentElement.parentElement.innerHTML = ''">Close</button>
+</div>
+{% elif recipe %}
+<div class="preview-modal">
+    <div class="preview-header">
+        <h2>{{ recipe.name }}</h2>
+        <button class="btn-close" onclick="this.closest('.preview-modal').remove()">&times;</button>
+    </div>
+
+    {% if recipe.description %}
+    <p class="preview-description">{{ recipe.description }}</p>
+    {% endif %}
+
+    <form action="/discover/add-recipe" method="post" class="preview-form">
+        <input type="hidden" name="source_url" value="{{ recipe.source_url }}">
+
+        <div class="form-group">
+            <label for="name">Recipe Name</label>
+            <input type="text" id="name" name="name" value="{{ recipe.name }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="2">{{ recipe.description }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="ingredients">Ingredients (edit as needed)</label>
+            <textarea id="ingredients" name="ingredients" rows="10">{% for ing in recipe.ingredients %}{{ ing }}
+{% endfor %}</textarea>
+            <small>One ingredient per line. Format: quantity unit ingredient</small>
+        </div>
+
+        <div class="form-group">
+            <label for="instructions">Instructions</label>
+            <textarea id="instructions" name="instructions" rows="8">{{ recipe.instructions }}</textarea>
+        </div>
+
+        <div class="preview-actions">
+            <button type="submit" class="btn btn-primary">Add to My Recipes</button>
+            <button type="button" class="btn" onclick="this.closest('.preview-modal').remove()">Cancel</button>
+        </div>
+    </form>
+</div>
+{% else %}
+<div class="alert">
+    <p>Could not parse recipe from this page. You can still view it on the source site and add it manually.</p>
+    <a href="{{ url }}" target="_blank" class="btn">View on Source Site</a>
+    <button class="btn" onclick="this.parentElement.innerHTML = ''">Close</button>
+</div>
+{% endif %}

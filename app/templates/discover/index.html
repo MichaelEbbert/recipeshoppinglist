@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Discover Recipes{% endblock %}
+
+{% block content %}
+<div class="discover-page">
+    <div class="page-header">
+        <h1>Discover New Recipes</h1>
+    </div>
+
+    <div class="search-section">
+        <form hx-get="/discover/search"
+              hx-target="#recipe-results"
+              hx-swap="innerHTML"
+              hx-indicator="#search-spinner">
+            <div class="search-bar">
+                <input type="text" name="q" placeholder="Search for recipes (e.g., chicken, pasta, soup)...">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+
+        <button class="btn"
+                hx-get="/discover/search"
+                hx-target="#recipe-results"
+                hx-swap="innerHTML"
+                hx-indicator="#search-spinner">
+            Surprise Me!
+        </button>
+
+        <span id="search-spinner" class="htmx-indicator">Searching...</span>
+    </div>
+
+    <div id="recipe-results" class="recipe-results">
+        {% if message %}
+        <p class="help-text">{{ message }}</p>
+        {% endif %}
+    </div>
+
+    <div id="recipe-preview" class="recipe-preview"></div>
+</div>
+{% endblock %}
