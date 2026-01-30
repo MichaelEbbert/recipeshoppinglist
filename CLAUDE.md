@@ -15,11 +15,20 @@ This is a local web application that runs on a home PC and is accessible from an
 - Add, edit, and delete recipes
 - Automatic complexity rating (easy/medium/hard) based on ingredient count and steps
 
+**Unsupported unit warning:**
+- When saving a recipe with non-standard units (e.g., "package", "bunch"), a red warning appears
+- User must click Save a second time to confirm - prevents accidental use of units that won't aggregate properly
+- Ingredients with unsupported units will appear on shopping lists but won't combine with other units
+
+**"To taste" ingredients:**
+- Just type "salt to taste" as the ingredient name (no quantity/unit)
+- These appear on shopping lists as-is without aggregation
+
 ### 2. Meal Planning / Recipe Selection
-- Web page displaying all saved recipes with complexity badges
+- Web page displaying all saved recipes with checkboxes
 - Select multiple recipes for an upcoming shopping trip
-- Selected recipes are used to generate the shopping list
-- Live updates via HTMX polling (5-second refresh)
+- Simple form-based flow (no HTMX/active content on shopping pages)
+- Linear flow: Select recipes → Inventory check → Shopping list → Start over
 
 ### 3. Ingredient Aggregation
 - Combine ingredients across all selected recipes
@@ -29,11 +38,25 @@ This is a local web application that runs on a home PC and is accessible from an
 
 ### 4. Shopping Unit Conversion
 - Convert aggregated ingredients to practical shopping units
-- Examples:
-  - Tablespoons of butter → sticks or packs of butter
-  - Teaspoons of vanilla → bottles of vanilla extract
-  - Cups of flour → bags of flour
-- Round up to purchasable quantities (can't buy 1/3 of an egg)
+- Display quantities as fractions (1/4 cup, 1/2 lb) not decimals
+- Round up for shopping bias (need 3/16 lb → show 1/4 lb)
+
+**Volume roll-up rules:**
+- tsp/tbsp → cups (when >= 1/8 cup)
+- cups → pints (when >= 1 pint)
+- pints → quarts (when >= 1 quart)
+- quarts → gallons (when >= 1 gallon)
+
+**Weight roll-up rules:**
+- oz → lb (when >= 1/8 lb / 2 oz)
+
+**Special handling:**
+- Butter: sticks (1 stick = 8 tbsp)
+- Eggs: half dozen or dozen
+- Flour: bags for large quantities
+- Milk: gallons for large quantities
+
+**No metric conversion** - US units only. Users convert at the store if shelf labels show ml/g.
 
 ### 5. Inventory Check
 - Display all needed ingredients with input fields
@@ -101,6 +124,8 @@ All pages return `Cache-Control: no-store` headers to ensure users always see fr
 - Simple, no separate database server to maintain
 - Easy to backup (copy one file)
 - Auto-created on first run
+- Database file is gitignored - stays on local machine only
+- To move to another machine: copy `data/recipes.db` to same location
 
 ### Tech Stack
 **Backend:**
@@ -119,9 +144,9 @@ All pages return `Cache-Control: no-store` headers to ensure users always see fr
 - Print-friendly recipe view (target: 67 lines max per recipe)
 
 **Live Updates:**
-- HTMX polling (`hx-trigger="every 5s"`) for near-real-time sync
-- When one user updates a recipe, others see it within ~5 seconds
-- Simple approach, no WebSocket complexity needed
+- HTMX used on discover page for search results
+- Shopping flow uses simple form POSTs (no live updates needed)
+- Recipe pages are static - refresh to see updates from other users
 
 ### Recipe Discovery Sources
 All sources are queried via HTTP with no API keys required:
@@ -180,9 +205,9 @@ recipeshoppinglist/
 - unit (as specified in recipe, e.g., "tbsp", "cup", "cloves")
 - sort_order
 
-**Shopping Selections** (temporary, for current shopping session)
-- recipe_id
-- selected_at
+**Shopping Selections** (legacy - no longer used)
+- Shopping flow now uses form POST to pass selected recipe IDs between pages
+- No server-side session storage needed
 
 ## Running the Application
 
