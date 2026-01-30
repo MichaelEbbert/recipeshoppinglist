@@ -139,7 +139,7 @@ async def search_mealdb(client: httpx.AsyncClient, query: str) -> list[dict]:
 
 def format_mealdb_card(meal: dict) -> dict:
     """Format a MealDB meal for display as a card."""
-    ing_count = sum(1 for i in range(1, 21) if meal.get(f"strIngredient{i}", "").strip())
+    ing_count = sum(1 for i in range(1, 21) if (meal.get(f"strIngredient{i}") or "").strip())
     instructions = meal.get("strInstructions", "") or ""
     steps = re.split(r'(?:\r?\n)+|(?<=\.)\s+(?=[A-Z0-9])', instructions)
     steps = [s.strip() for s in steps if s.strip() and len(s.strip()) > 10]
