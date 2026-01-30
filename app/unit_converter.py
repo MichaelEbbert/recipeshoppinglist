@@ -53,19 +53,23 @@ WEIGHT_TO_OZ = {
     "kilograms": 35.274,
 }
 
-# Count units (no conversion, just aggregate)
-COUNT_UNITS = {
-    "unit", "units", "piece", "pieces",
-    "clove", "cloves",
-    "slice", "slices",
-    "can", "cans",
-    "bunch", "bunches",
-    "head", "heads",
-    "stalk", "stalks",
-    "sprig", "sprigs",
-    "leaf", "leaves",
-    "whole", "",
+# Count units - map to singular form for consistent aggregation
+COUNT_UNITS_SINGULAR = {
+    "unit": "unit", "units": "unit",
+    "piece": "piece", "pieces": "piece",
+    "clove": "clove", "cloves": "clove",
+    "slice": "slice", "slices": "slice",
+    "can": "can", "cans": "can",
+    "bunch": "bunch", "bunches": "bunch",
+    "head": "head", "heads": "head",
+    "stalk": "stalk", "stalks": "stalk",
+    "sprig": "sprig", "sprigs": "sprig",
+    "leaf": "leaf", "leaves": "leaf",
+    "whole": "whole", "": "unit",
 }
+
+# Set of all count units for quick lookup
+COUNT_UNITS = set(COUNT_UNITS_SINGULAR.keys())
 
 # Ingredient-specific conversions
 INGREDIENT_CONVERSIONS = {
@@ -117,11 +121,15 @@ def get_base_unit_and_factor(unit: str, ingredient_name: str = "") -> tuple[str,
     if unit in WEIGHT_TO_OZ:
         return "oz", WEIGHT_TO_OZ[unit], "weight"
 
-    # Count units
-    if unit in COUNT_UNITS or not unit:
+    # Count units - preserve the specific unit type (slice, clove, etc.)
+    if unit in COUNT_UNITS:
+        return COUNT_UNITS_SINGULAR[unit], 1, "count"
+
+    # Empty unit
+    if not unit:
         return "unit", 1, "count"
 
-    # Unknown unit, treat as count
+    # Unknown unit, treat as count but preserve the unit name
     return unit, 1, "count"
 
 
@@ -263,10 +271,15 @@ def suggest_shopping_unit(quantity_in_base: float, base_unit: str, ingredient_na
         else:
             return to_fraction_string(quantity_in_base), "oz"
 
-    # Count units: round up to whole numbers
+    # Count units: round up to whole numbers, preserve specific unit names
+    import math
+    count = math.ceil(quantity_in_base)
+
+    # Generic "unit" becomes "count", but specific units (slice, clove, etc.) stay as-is
     if base_unit == "unit":
-        import math
-        return str(math.ceil(quantity_in_base)), "count"
+        return str(count), "count"
+    elif base_unit in COUNT_UNITS_SINGULAR.values():
+        return str(count), base_unit
 
     return to_fraction_string(quantity_in_base), base_unit
 

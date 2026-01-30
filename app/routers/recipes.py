@@ -296,8 +296,9 @@ def parse_ingredient_line(line: str) -> tuple[Optional[float], Optional[str], st
     """
     line = line.strip()
 
-    # Pattern to match quantity (including fractions)
-    qty_pattern = r'^([\d]+(?:/[\d]+)?(?:\s+[\d]+/[\d]+)?|\d+\.?\d*)\s*'
+    # Pattern to match quantity (including fractions and decimals)
+    # Order matters: try decimals first, then fractions, then whole numbers
+    qty_pattern = r'^(\d+\.\d+|\d+\s+\d+/\d+|\d+/\d+|\d+)\s*'
 
     # Common units
     units = [
