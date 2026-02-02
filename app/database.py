@@ -76,6 +76,13 @@ async def init_db():
         except Exception:
             pass  # Column already exists
 
+        # Migration: add favorite column if it doesn't exist
+        try:
+            await db.execute("ALTER TABLE recipes ADD COLUMN favorite INTEGER DEFAULT 0")
+            await db.commit()
+        except Exception:
+            pass  # Column already exists
+
         # Seed default unit conversions if empty
         cursor = await db.execute("SELECT COUNT(*) FROM unit_conversions")
         count = (await cursor.fetchone())[0]

@@ -252,6 +252,69 @@ body {
     margin-bottom: 0;
 }
 
+/* Favorite heart button */
+.favorite-form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
+
+.favorite-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease;
+}
+
+.favorite-btn:hover {
+    transform: scale(1.1);
+}
+
+.favorite-btn .heart-icon {
+    fill: #fff;
+    stroke: #e91e63;
+    stroke-width: 2;
+    transition: fill 0.15s ease;
+}
+
+.favorite-btn.is-favorite .heart-icon {
+    fill: #e91e63;
+    stroke: #e91e63;
+}
+
+.favorite-btn-large .heart-icon {
+    width: 32px;
+    height: 32px;
+}
+
+/* Recipe card header with favorite */
+.recipe-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.recipe-card-header h3 {
+    flex: 1;
+    margin: 0 0 0.5rem 0;
+}
+
+/* Title with favorite on detail page */
+.title-with-favorite {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.title-with-favorite h1 {
+    margin: 0;
+}
+
 /* Recipe grid */
 .recipe-grid {
     display: grid;
@@ -596,13 +659,34 @@ body {
     margin-bottom: 1rem;
 }
 
+/* Recipe preview container - modal overlay */
+.recipe-preview:empty {
+    display: none;
+}
+
+.recipe-preview:not(:empty) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
 /* Preview modal */
 .preview-modal {
     background: #fff;
     border-radius: 8px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    margin-top: 2rem;
     max-width: 800px;
+    width: 100%;
+    margin: auto;
 }
 
 .preview-header {

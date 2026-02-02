@@ -17,13 +17,28 @@ templates = Jinja2Templates(directory="app/templates")
 async def list_recipes(request: Request, db: aiosqlite.Connection = Depends(get_db)):
     """List all recipes."""
     cursor = await db.execute(
-        "SELECT id, name, description, complexity FROM recipes ORDER BY name"
+        "SELECT id, name, description, complexity, favorite FROM recipes ORDER BY name"
     )
     recipes = await cursor.fetchall()
 
     return templates.TemplateResponse("recipes/list.html", {
         "request": request,
         "recipes": recipes,
+    })
+
+
+@router.get("/favorites", response_class=HTMLResponse)
+async def list_favorites(request: Request, db: aiosqlite.Connection = Depends(get_db)):
+    """List favorite recipes."""
+    cursor = await db.execute(
+        "SELECT id, name, description, complexity, favorite FROM recipes WHERE favorite = 1 ORDER BY name"
+    )
+    recipes = await cursor.fetchall()
+
+    return templates.TemplateResponse("recipes/list.html", {
+        "request": request,
+        "recipes": recipes,
+        "favorites_only": True,
     })
 
 
@@ -116,6 +131,8 @@ async def view_recipe(request: Request, recipe_id: int, db: aiosqlite.Connection
         source_url=recipe_row["source_url"],
         complexity=recipe_row["complexity"] if "complexity" in recipe_row.keys() else "medium",
     )
+    # Get favorite status (handle column not existing)
+    favorite = recipe_row["favorite"] if "favorite" in recipe_row.keys() else 0
 
     cursor = await db.execute(
         "SELECT * FROM ingredients WHERE recipe_id = ? ORDER BY sort_order",
@@ -137,6 +154,7 @@ async def view_recipe(request: Request, recipe_id: int, db: aiosqlite.Connection
     return templates.TemplateResponse("recipes/detail.html", {
         "request": request,
         "recipe": recipe,
+        "favorite": favorite,
     })
 
 
@@ -271,6 +289,25 @@ async def delete_recipe(recipe_id: int, db: aiosqlite.Connection = Depends(get_d
     await db.execute("DELETE FROM recipes WHERE id = ?", (recipe_id,))
     await db.commit()
     return RedirectResponse("/recipes", status_code=303)
+
+
+@router.post("/{recipe_id}/favorite")
+async def toggle_favorite(request: Request, recipe_id: int, db: aiosqlite.Connection = Depends(get_db)):
+    """Toggle favorite status for a recipe."""
+    # Get current favorite status
+    cursor = await db.execute("SELECT favorite FROM recipes WHERE id = ?", (recipe_id,))
+    row = await cursor.fetchone()
+    if not row:
+        return RedirectResponse("/recipes", status_code=303)
+
+    # Toggle the value
+    new_value = 0 if row["favorite"] else 1
+    await db.execute("UPDATE recipes SET favorite = ? WHERE id = ?", (new_value, recipe_id))
+    await db.commit()
+
+    # Return to the referring page or recipe detail
+    referer = request.headers.get("referer", f"/recipes/{recipe_id}")
+    return RedirectResponse(referer, status_code=303)
 
 
 async def save_ingredients(db: aiosqlite.Connection, recipe_id: int, ingredients_text: str):

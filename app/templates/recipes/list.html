@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Recipes - Recipe Shopping List{% endblock %}
+{% block title %}{% if favorites_only %}Favorites{% else %}Recipes{% endif %} - Recipe Shopping List{% endblock %}
 
 {% block content %}
 <div class="recipes-page">
     <div class="page-header">
-        <h1>Recipes</h1>
+        <h1>{% if favorites_only %}Favorite Recipes{% else %}Recipes{% endif %}</h1>
         <a href="/recipes/new" class="btn btn-primary">Add Recipe</a>
     </div>
 
@@ -13,7 +13,16 @@
     <div class="recipe-grid">
         {% for recipe in recipes %}
         <div class="recipe-card">
-            <h3><a href="/recipes/{{ recipe.id }}">{{ recipe.name }}</a></h3>
+            <div class="recipe-card-header">
+                <h3><a href="/recipes/{{ recipe.id }}">{{ recipe.name }}</a></h3>
+                <form action="/recipes/{{ recipe.id }}/favorite" method="post" class="favorite-form">
+                    <button type="submit" class="favorite-btn {% if recipe.favorite %}is-favorite{% endif %}" title="{% if recipe.favorite %}Remove from favorites{% else %}Add to favorites{% endif %}">
+                        <svg class="heart-icon" viewBox="0 0 24 24" width="24" height="24">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
             {% if recipe.complexity %}
             <span class="complexity-badge complexity-{{ recipe.complexity }}">{{ recipe.complexity | capitalize }}</span>
             {% endif %}
@@ -25,8 +34,13 @@
     </div>
     {% else %}
     <div class="empty-state">
+        {% if favorites_only %}
+        <p>No favorite recipes yet. Browse your recipes and click the heart to add favorites!</p>
+        <a href="/recipes" class="btn btn-primary">View All Recipes</a>
+        {% else %}
         <p>No recipes yet. Add your first recipe to get started!</p>
         <a href="/recipes/new" class="btn btn-primary">Add Recipe</a>
+        {% endif %}
     </div>
     {% endif %}
 </div>
