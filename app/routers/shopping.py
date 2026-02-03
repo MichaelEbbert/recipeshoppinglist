@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Depends, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 import aiosqlite
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Tuple
 from collections import defaultdict
 
 from ..database import get_db
@@ -118,7 +118,7 @@ async def get_aggregated_ingredients(db: aiosqlite.Connection, recipe_ids: List[
     ingredients = await cursor.fetchall()
 
     # Aggregate by normalized name and base unit
-    aggregated: dict[str, dict] = defaultdict(lambda: {
+    aggregated: Dict[str, dict] = defaultdict(lambda: {
         "total_base": 0,
         "base_unit": None,
         "unit_type": None,

@@ -1,6 +1,6 @@
 """Unit conversion utilities for aggregating and converting ingredients."""
 
-from typing import Optional
+from typing import Optional, Tuple
 import re
 
 # Base unit conversion table (everything converts to a base unit)
@@ -92,7 +92,7 @@ def normalize_unit(unit: str) -> str:
     return unit.lower().strip().rstrip(".")
 
 
-def get_base_unit_and_factor(unit: str, ingredient_name: str = "") -> tuple[str, float, str]:
+def get_base_unit_and_factor(unit: str, ingredient_name: str = "") -> Tuple[str, float, str]:
     """
     Get the base unit and conversion factor for a given unit.
     Returns: (base_unit, factor, unit_type) where unit_type is 'volume', 'weight', or 'count'
@@ -133,7 +133,7 @@ def get_base_unit_and_factor(unit: str, ingredient_name: str = "") -> tuple[str,
     return unit, 1, "count"
 
 
-def convert_to_base(quantity: float, unit: str, ingredient_name: str = "") -> tuple[float, str, str]:
+def convert_to_base(quantity: float, unit: str, ingredient_name: str = "") -> Tuple[float, str, str]:
     """
     Convert a quantity to base units.
     Returns: (converted_quantity, base_unit, unit_type)
@@ -201,7 +201,7 @@ def to_fraction_string(value: float) -> str:
     return f"{whole} {frac_str}"
 
 
-def suggest_shopping_unit(quantity_in_base: float, base_unit: str, ingredient_name: str) -> tuple[str, str]:
+def suggest_shopping_unit(quantity_in_base: float, base_unit: str, ingredient_name: str) -> Tuple[str, str]:
     """
     Suggest a practical shopping unit for an ingredient.
     Returns: (shopping_quantity_string, shopping_unit)

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Depends, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 import aiosqlite
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Tuple
 import re
 
 from ..database import get_db
@@ -326,7 +326,7 @@ async def save_ingredients(db: aiosqlite.Connection, recipe_id: int, ingredients
         )
 
 
-def parse_ingredient_line(line: str) -> tuple[Optional[float], Optional[str], str]:
+def parse_ingredient_line(line: str) -> Tuple[Optional[float], Optional[str], str]:
     """
     Parse an ingredient line like "2 cups flour" or "1/2 tsp salt".
     Returns: (quantity, unit, name)
