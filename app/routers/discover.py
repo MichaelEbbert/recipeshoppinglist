@@ -6,7 +6,7 @@ import httpx
 from bs4 import BeautifulSoup
 import json
 import re
-from typing import Optional
+from typing import Optional, List, Dict
 import asyncio
 
 from ..database import get_db
@@ -38,7 +38,7 @@ def calc_complexity_from_counts(ing_count: int, step_count: int) -> str:
     return "medium"
 
 
-def filter_by_complexity(recipes: list[dict], max_complexity: str) -> list[dict]:
+def filter_by_complexity(recipes: List[Dict], max_complexity: str) -> List[Dict]:
     """Filter recipes by maximum complexity."""
     if not max_complexity or max_complexity == "hard":
         return recipes
@@ -119,7 +119,7 @@ async def search_recipes(
 
 # ============ TheMealDB Functions ============
 
-async def search_mealdb(client: httpx.AsyncClient, query: str) -> list[dict]:
+async def search_mealdb(client: httpx.AsyncClient, query: str) -> List[Dict]:
     """Search TheMealDB for recipes."""
     recipes = []
     try:
@@ -183,7 +183,7 @@ async def fetch_mealdb_recipe(client: httpx.AsyncClient, recipe_id: str) -> Opti
 
 # ============ BBC Good Food Functions ============
 
-async def search_bbc(client: httpx.AsyncClient, query: str) -> list[dict]:
+async def search_bbc(client: httpx.AsyncClient, query: str) -> List[Dict]:
     """Search BBC Good Food for recipes."""
     recipes = []
     try:
@@ -246,7 +246,7 @@ async def fetch_bbc_recipe(client: httpx.AsyncClient, url: str) -> Optional[dict
 
 # ============ Skinnytaste Functions (Air Fryer) ============
 
-async def search_skinnytaste(client: httpx.AsyncClient, query: str) -> list[dict]:
+async def search_skinnytaste(client: httpx.AsyncClient, query: str) -> List[Dict]:
     """Search Skinnytaste for recipes (great for air fryer)."""
     recipes = []
     try:
@@ -282,7 +282,7 @@ async def fetch_skinnytaste_recipe(client: httpx.AsyncClient, url: str) -> Optio
 
 # ============ Hey Grill Hey Functions (BBQ) ============
 
-async def search_heygrillhey(client: httpx.AsyncClient, query: str) -> list[dict]:
+async def search_heygrillhey(client: httpx.AsyncClient, query: str) -> List[Dict]:
     """Search Hey Grill Hey for BBQ recipes."""
     recipes = []
     try:

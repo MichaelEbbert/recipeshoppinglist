@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Depends, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 import aiosqlite
-from typing import Optional
+from typing import Optional, List, Dict
 import re
 
 from ..database import get_db
@@ -51,7 +51,7 @@ async def new_recipe_form(request: Request):
     })
 
 
-def find_unsupported_units(ingredients_text: str) -> list[dict]:
+def find_unsupported_units(ingredients_text: str) -> List[Dict]:
     """Find ingredients with unsupported units. Returns list of {line, unit} dicts."""
     warnings = []
     lines = ingredients_text.strip().split("\n")

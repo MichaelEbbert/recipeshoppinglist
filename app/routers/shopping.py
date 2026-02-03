@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Depends, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 import aiosqlite
-from typing import Optional
+from typing import Optional, List, Dict
 from collections import defaultdict
 
 from ..database import get_db
@@ -104,7 +104,7 @@ async def generate_shopping_list(
     })
 
 
-async def get_aggregated_ingredients(db: aiosqlite.Connection, recipe_ids: list[int]) -> list[ShoppingItem]:
+async def get_aggregated_ingredients(db: aiosqlite.Connection, recipe_ids: List[int]) -> List[ShoppingItem]:
     """Get aggregated ingredients from selected recipes."""
     if not recipe_ids:
         return []

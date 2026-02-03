@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 
 @dataclass
@@ -35,7 +35,7 @@ class Recipe:
     complexity: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-    ingredients: list[Ingredient] = None
+    ingredients: List[Ingredient] = None
 
     def __post_init__(self):
         if self.ingredients is None:
