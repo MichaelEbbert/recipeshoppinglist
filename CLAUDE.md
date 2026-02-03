@@ -2,7 +2,7 @@
 
 ## AWS Deployment Info
 
-- **Subdomain:** https://recipesshoppinglist.mebbert.com
+- **Subdomain:** https://recipeshoppinglist.mebbert.com
 - **Internal Port:** 3003
 - **Status:** Active
 
@@ -18,10 +18,10 @@ Full deployment docs on server: `/home/ec2-user/taskschedule/AWS_DEPLOYMENT.md`
 Already configured in `/etc/nginx/conf.d/subdomains.conf` to proxy to port 3003.
 
 ### To Deploy
-1. Copy app to `/home/ec2-user/recipesshoppinglist/`
+1. Copy app to `/home/ec2-user/recipeshoppinglist/`
 2. Run on port 3003 (update main.py uvicorn port)
 3. Create systemd service (use `/etc/systemd/system/taskschedule.service` as template)
-4. Enable and start: `sudo systemctl enable --now recipesshoppinglist`
+4. Enable and start: `sudo systemctl enable --now recipeshoppinglist`
 
 ---
 
