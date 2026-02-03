@@ -1,3 +1,4 @@
+import os
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
@@ -54,9 +55,10 @@ async def home(request: Request):
 
 
 if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 3003))
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=8000,
+        port=port,
         reload=True,
     )

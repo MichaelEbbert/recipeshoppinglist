@@ -1,5 +1,30 @@
 # Recipe Shopping List Application
 
+## AWS Deployment Info
+
+- **Subdomain:** https://recipesshoppinglist.mebbert.com
+- **Internal Port:** 3003
+- **Status:** Active
+
+### SSH Access
+```bash
+ssh -i "C:\claude_projects\taskschedule\taskschedule-key.pem" ec2-user@100.50.222.238
+```
+
+### Server Documentation
+Full deployment docs on server: `/home/ec2-user/taskschedule/AWS_DEPLOYMENT.md`
+
+### Nginx Config
+Already configured in `/etc/nginx/conf.d/subdomains.conf` to proxy to port 3003.
+
+### To Deploy
+1. Copy app to `/home/ec2-user/recipesshoppinglist/`
+2. Run on port 3003 (update main.py uvicorn port)
+3. Create systemd service (use `/etc/systemd/system/taskschedule.service` as template)
+4. Enable and start: `sudo systemctl enable --now recipesshoppinglist`
+
+---
+
 A home application for managing family recipes and generating smart shopping lists.
 
 ## Overview
