@@ -1,6 +1,6 @@
 """Unit conversion utilities for aggregating and converting ingredients."""
 
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Set
 import re
 
 # Base unit conversion table (everything converts to a base unit)
@@ -284,7 +284,7 @@ def suggest_shopping_unit(quantity_in_base: float, base_unit: str, ingredient_na
     return to_fraction_string(quantity_in_base), base_unit
 
 
-def get_supported_units() -> set[str]:
+def get_supported_units() -> Set[str]:
     """Return all supported units for conversion."""
     supported = set()
     supported.update(VOLUME_TO_TSP.keys())
