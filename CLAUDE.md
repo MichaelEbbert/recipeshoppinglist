@@ -25,6 +25,96 @@ Already configured in `/etc/nginx/conf.d/subdomains.conf` to proxy to port 3003.
 
 ---
 
+## TODO: Nginx-Level Authentication
+
+Secure all apps (tifootball, sevenhabitslist, recipeshoppinglist) at the nginx layer using `auth_request` module with a shared auth service.
+
+### Changes Required
+
+1. **Create auth service** (`/home/ec2-user/auth-service/`)
+   - Simple FastAPI app on port 3010 (internal only)
+   - Endpoints:
+     - `GET /auth/check` - returns 200 if session cookie valid, 401 if not
+     - `GET /auth/login` - renders login page
+     - `POST /auth/login` - validates credentials, sets session cookie
+     - `GET /auth/logout` - clears session cookie
+   - Share user credentials with taskschedule (read from same database or hardcoded family users)
+
+2. **Update nginx config** (`/etc/nginx/conf.d/subdomains.conf`)
+   - Add `auth_request` directive to each protected server block:
+     ```nginx
+     location / {
+         auth_request /auth/check;
+         error_page 401 = @login_redirect;
+         # ... existing proxy_pass ...
+     }
+
+     location = /auth/check {
+         internal;
+         proxy_pass http://127.0.0.1:3010/auth/check;
+         proxy_pass_request_body off;
+         proxy_set_header Content-Length "";
+         proxy_set_header X-Original-URI $request_uri;
+         proxy_set_header Cookie $http_cookie;
+     }
+
+     location @login_redirect {
+         return 302 https://auth.mebbert.com/login?next=$scheme://$host$request_uri;
+     }
+
+     location /auth/ {
+         proxy_pass http://127.0.0.1:3010/auth/;
+         proxy_set_header Host $host;
+     }
+     ```
+
+3. **Create auth subdomain** (optional, or serve from each app)
+   - Option A: Dedicated `auth.mebbert.com` subdomain for login page
+   - Option B: Each app serves `/auth/login` via nginx location block (simpler)
+
+4. **DNS and SSL** (if using Option A)
+   - Add Route53 A record for `auth.mebbert.com`
+   - Run certbot for SSL cert
+
+5. **Session cookie settings**
+   - Domain: `.mebbert.com` (shared across all subdomains)
+   - Secure: true
+   - HttpOnly: true
+   - SameSite: Lax
+
+6. **Create systemd service** for auth-service
+   - Similar to other apps
+   - Add to sudoers for management
+
+### Files to Create/Modify
+
+| File | Action |
+|------|--------|
+| `/home/ec2-user/auth-service/main.py` | Create - FastAPI auth endpoints |
+| `/home/ec2-user/auth-service/templates/login.html` | Create - Login page |
+| `/etc/nginx/conf.d/subdomains.conf` | Modify - Add auth_request blocks |
+| `/etc/systemd/system/auth-service.service` | Create - systemd unit |
+| `/etc/sudoers.d/app-services` | Modify - Add auth-service commands |
+
+### Alternative: Simpler HTTP Basic Auth
+
+If a browser login dialog is acceptable (less pretty but zero code):
+
+```nginx
+location / {
+    auth_basic "Family Apps";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+    # ... existing proxy_pass ...
+}
+```
+
+Create password file:
+```bash
+sudo htpasswd -c /etc/nginx/.htpasswd username
+```
+
+---
+
 A home application for managing family recipes and generating smart shopping lists.
 
 ## Overview
