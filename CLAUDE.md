@@ -17,11 +17,17 @@ Full deployment docs on server: `/home/ec2-user/taskschedule/AWS_DEPLOYMENT.md`
 ### Nginx Config
 Already configured in `/etc/nginx/conf.d/subdomains.conf` to proxy to port 3003.
 
-### To Deploy
-1. Copy app to `/home/ec2-user/recipeshoppinglist/`
-2. Run on port 3003 (update main.py uvicorn port)
-3. Create systemd service (use `/etc/systemd/system/taskschedule.service` as template)
-4. Enable and start: `sudo systemctl enable --now recipeshoppinglist`
+### Deploy
+
+Use the centralized deployment scripts in `C:\claude_projects\deployment-manager\`:
+
+```bash
+cd C:\claude_projects\deployment-manager
+python deploy.py recipeshoppinglist       # Full deploy (sync + deps + restart)
+python status.py recipeshoppinglist       # Health check
+python restart.py recipeshoppinglist      # Quick restart
+python logs.py recipeshoppinglist -f      # Follow logs
+```
 
 ---
 
